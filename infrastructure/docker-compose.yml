@@ -1,0 +1,31 @@
+version: '3.2'
+
+services:
+  server-multiuser-table-go:
+    container_name: server-multiuser-table-go
+    build:
+      context: go-server
+      args:
+        - USER_ID=${USER_ID-1000}
+        - GROUP_ID=${GROUP_ID-1000}
+    volumes:
+      - ../server:/var/www/go/multiuser-table-go/server
+    ports:
+      - "80:8080"
+      - "38000:38000"
+    tty: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      multiuser-table-go-net:
+        ipv4_address: 172.123.0.4
+
+networks:
+  multiuser-table-go-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.123.0.0/24
+    driver_opts:
+      com.docker.network.bridge.name: br_mtg

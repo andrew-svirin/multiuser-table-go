@@ -1,5 +1,7 @@
 package streamer
 
+// Streamer - streaming data into streams.
+
 import (
 	"log"
 	"net/http"
