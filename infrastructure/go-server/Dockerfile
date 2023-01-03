@@ -24,6 +24,11 @@ RUN userdel -f ${USER_NAME} \
     && chown --changes --silent --no-dereference --recursive ${USER_ID}:${GROUP_ID}  \
       "/home/${USER_NAME}" /var/log /var/www || true
 
+
+
 USER ${USER_NAME}:${GROUP_NAME}
 
 WORKDIR /var/www/go/multiuser-table-go/server
+
+# Install debug tool.
+RUN go install github.com/go-delve/delve/cmd/dlv@latest

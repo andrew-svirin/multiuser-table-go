@@ -12,7 +12,7 @@ services:
       - ../server:/var/www/go/multiuser-table-go/server
     ports:
       - "80:8080"
-      - "38000:38000"
+      - "2345:2345"
     tty: true
     extra_hosts:
       - "host.docker.internal:host-gateway"

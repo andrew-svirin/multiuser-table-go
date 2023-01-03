@@ -9,6 +9,7 @@ DB_CONTAINER_EXEC := $(DC) exec $(DB_CONTAINER)
 
 BASH := /bin/bash
 GO := /usr/local/go/bin/go
+DLV := /var/www/go/bin/dlv
 
 build:
 	cd $(DOCKER_DIR) && $(DC) build
@@ -32,3 +33,7 @@ bash-db:
 
 serve-server:
 	cd $(DOCKER_DIR) && $(SERVER_CONTAINER_EXEC) $(GO) run .
+
+debug-server:
+	cd $(DOCKER_DIR) && $(SERVER_CONTAINER_EXEC) $(GO) build -gcflags="all=-N -l" -o server.bin
+	cd $(DOCKER_DIR) && $(SERVER_CONTAINER_EXEC) $(DLV) --listen=:2345 --headless=true --api-version=2 exec ./server.bin
