@@ -1,18 +1,30 @@
 package main
 
 import (
-	"github.com/andrew-svirin/multiuser-table-go/server/services/router"
-	"github.com/andrew-svirin/multiuser-table-go/server/services/server"
+	"github.com/andrew-svirin/multiuser-table-go/server/services/runtime"
+	"log"
 )
 
 // main - Entrypoint.
 func main() {
-	startHttpServer()
-}
+	r := new(runtime.Runtime)
+	r.Init()
 
-// startHttpServer - starts http server needs for handle http requests.
-func startHttpServer() {
-	r := router.ResolveHttpRouter()
+	r.StartServers()
+	go func() {
+		log.Println("HTTP Server started")
 
-	server.RunHttpServer(r)
+		r.ServeHttpServer()
+	}()
+	r.WaitServersStarted()
+
+	r.StartCmd()
+	go func() {
+		log.Println("Cmd Server started")
+
+		r.ServeCmd()
+	}()
+	r.WaitCmdExit()
+
+	log.Println("Exit")
 }

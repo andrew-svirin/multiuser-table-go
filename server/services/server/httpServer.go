@@ -4,29 +4,38 @@ package server
 // and responding in answer.
 
 import (
-	"github.com/andrew-svirin/multiuser-table-go/server/services/router"
-	"log"
+	"context"
 	"net/http"
 	"strconv"
 )
 
-// Server - custom server structure.
-type Server struct {
-	httpServer *http.Server
+// HttpServer - custom server structure.
+type HttpServer struct {
+	server *http.Server
 }
 
-// Serve - Register router and Start listen incoming requests
-func (s *Server) Serve(port int, handler http.Handler) {
-	err := http.ListenAndServe(":"+strconv.Itoa(port), handler)
-
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+// Init - Register router and listening port.
+func (s *HttpServer) Init(port int, handler http.Handler) {
+	s.server = &http.Server{
+		Addr:    ":" + strconv.Itoa(port),
+		Handler: handler,
 	}
 }
 
-// RunHttpServer - Serve http server.
-func RunHttpServer(r *router.Router) {
-	srv := new(Server)
+// Serve - Start listen incoming requests.
+func (s *HttpServer) Serve() {
+	err := s.server.ListenAndServe()
 
-	srv.Serve(8080, r)
+	if err != nil && err.Error() != "http: Server closed" {
+		panic(err)
+	}
+}
+
+// Shutdown - Stop listening incoming requests.
+func (s *HttpServer) Shutdown() {
+	err := s.server.Shutdown(context.TODO())
+
+	if err != nil {
+		panic(err)
+	}
 }
