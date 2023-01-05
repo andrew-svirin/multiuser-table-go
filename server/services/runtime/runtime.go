@@ -60,8 +60,8 @@ func (r *Runtime) ServeHttpServer() {
 	r.httpServer.Serve()
 }
 
-// ServeSocketServer - serve Socket server.
-func (r *Runtime) ServeSocketServer() {
+// ServeWsServer - serve Socket server.
+func (r *Runtime) ServeWsServer() {
 	r.wg.Done()
 	r.wsServer.Serve()
 }

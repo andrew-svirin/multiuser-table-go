@@ -23,9 +23,9 @@ func main() {
 	}()
 
 	go func() {
-		log.Println("Socket Server started")
+		log.Println("WS Server started")
 
-		r.ServeSocketServer()
+		r.ServeWsServer()
 	}()
 
 	r.WaitServersStarted()
