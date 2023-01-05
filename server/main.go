@@ -5,17 +5,29 @@ import (
 	"log"
 )
 
+var r *runtime.Runtime
+
+// init - Invoking before main func.
+func init() {
+	r = new(runtime.Runtime)
+	r.Init()
+}
+
 // main - Entrypoint.
 func main() {
-	r := new(runtime.Runtime)
-	r.Init()
-
 	r.StartServers()
 	go func() {
 		log.Println("HTTP Server started")
 
 		r.ServeHttpServer()
 	}()
+
+	go func() {
+		log.Println("Socket Server started")
+
+		r.ServeSocketServer()
+	}()
+
 	r.WaitServersStarted()
 
 	r.StartCmd()

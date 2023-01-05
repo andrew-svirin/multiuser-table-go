@@ -1,41 +1,17 @@
 package server
 
-// Http server - listener on http port for requests
-// and responding in answer.
-
 import (
-	"context"
-	"net/http"
-	"strconv"
+	"github.com/andrew-svirin/multiuser-table-go/server/services/router"
 )
 
-// HttpServer - custom server structure.
+// HttpServer - custom http server structure.
 type HttpServer struct {
-	server *http.Server
+	*Server
 }
 
-// Init - Register router and listening port.
-func (s *HttpServer) Init(port int, handler http.Handler) {
-	s.server = &http.Server{
-		Addr:    ":" + strconv.Itoa(port),
-		Handler: handler,
-	}
-}
-
-// Serve - Start listen incoming requests.
-func (s *HttpServer) Serve() {
-	err := s.server.ListenAndServe()
-
-	if err != nil && err.Error() != "http: Server closed" {
-		panic(err)
-	}
-}
-
-// Shutdown - Stop listening incoming requests.
-func (s *HttpServer) Shutdown() {
-	err := s.server.Shutdown(context.TODO())
-
-	if err != nil {
-		panic(err)
+// NewHttpServer - initiate new http server.
+func NewHttpServer(port int, router *router.HttpRouter) *HttpServer {
+	return &HttpServer{
+		Server: NewServer(port, router),
 	}
 }

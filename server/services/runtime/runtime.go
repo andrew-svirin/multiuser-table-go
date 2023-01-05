@@ -7,6 +7,7 @@ package runtime
 import (
 	"bufio"
 	"fmt"
+	"github.com/andrew-svirin/multiuser-table-go/server/services/controller"
 	"github.com/andrew-svirin/multiuser-table-go/server/services/router"
 	"github.com/andrew-svirin/multiuser-table-go/server/services/server"
 	"os"
@@ -17,6 +18,7 @@ import (
 // Runtime - object that aggregate dependents.
 type Runtime struct {
 	httpServer *server.HttpServer
+	wsServer   *server.WsServer
 	wg         *sync.WaitGroup
 }
 
@@ -25,27 +27,43 @@ type Runtime struct {
 func (r *Runtime) Init() {
 	r.wg = new(sync.WaitGroup)
 	r.initHttpServer()
+	r.initWsServer()
 }
 
 // initHttpServer - init HTTP server.
 func (r *Runtime) initHttpServer() {
-	ro := router.ResolveHttpRouter()
+	ro := router.NewHttpRouter()
+	ro.AddIndexRoute("/", controller.HandleIndex)
+	ro.AddRoute("/static/", controller.HandleStatic)
 
-	r.httpServer = new(server.HttpServer)
+	r.httpServer = server.NewHttpServer(8080, ro)
+}
 
-	r.httpServer.Init(8080, ro)
+// initWsServer - init WebSocket server.
+func (r *Runtime) initWsServer() {
+	ro := router.NewWsRouter()
+	ro.AddIndexRoute("/", controller.HandleWebsocket)
+
+	r.wsServer = server.NewWsServer(3456, ro)
 }
 
 // StartServers - initialize process of starting
 // all servers.
 func (r *Runtime) StartServers() {
-	r.wg.Add(1)
+	amount := 2 // amount of servers (http and socket)
+	r.wg.Add(amount)
 }
 
 // ServeHttpServer - serve HTTP server.
 func (r *Runtime) ServeHttpServer() {
 	r.wg.Done()
 	r.httpServer.Serve()
+}
+
+// ServeSocketServer - serve Socket server.
+func (r *Runtime) ServeSocketServer() {
+	r.wg.Done()
+	r.wsServer.Serve()
 }
 
 // WaitServersStarted - Wait to run all serving servers.
@@ -67,8 +85,6 @@ func (r *Runtime) ServeCmd() {
 	fmt.Println("CMD Shell\n---------------------")
 
 	for {
-		fmt.Print("-> ")
-
 		// Read command.
 		text, _ := reader.ReadString('\n')
 
@@ -77,10 +93,17 @@ func (r *Runtime) ServeCmd() {
 
 		switch text {
 		case "help":
+		case "h":
 			fmt.Println("Allowed commands:\n" +
-				"exit - to exit from program")
+				"count	- count connections\n" +
+				"exit 	- to exit from program")
+			break
+		case "count":
+		case "c":
+			fmt.Println("Connections:", r.wsServer.CountConnections())
 			break
 		case "exit":
+		case "e":
 			fmt.Println("Exiting...")
 			r.stop()
 			r.wg.Done()
@@ -98,4 +121,5 @@ func (r *Runtime) WaitCmdExit() {
 // stop - Correct closing all runtime dependencies.
 func (r *Runtime) stop() {
 	r.httpServer.Shutdown()
+	r.wsServer.Shutdown()
 }
