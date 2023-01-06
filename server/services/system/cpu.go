@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // cPUUsage - CPU usage.
@@ -38,5 +39,12 @@ func cPUUsage() (idle, total uint64) {
 
 // CPUUsagePercents - CPU usage in percents.
 func CPUUsagePercents() float64 {
-	return numToPercents(cPUUsage())
+	idle0, total0 := cPUUsage()
+	time.Sleep(1 * time.Second)
+	idle1, total1 := cPUUsage()
+
+	deltaIdle := idle1 - idle0
+	deltaTotal := total1 - total0
+
+	return numToPercents(deltaIdle, deltaTotal)
 }
