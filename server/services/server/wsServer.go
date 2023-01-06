@@ -8,7 +8,7 @@ import (
 
 // WsServer - custom ws server structure.
 type WsServer struct {
-	*Server
+	Server
 	upgrader       *websocket.Upgrader
 	connectionPool *websocket.ConnectionPool
 }
@@ -33,7 +33,7 @@ func NewWsServer(port int, router *router.WsRouter) *WsServer {
 	}
 
 	s := &WsServer{
-		Server:         NewServer(port, router),
+		Server:         *NewServer(port, router),
 		upgrader:       u,
 		connectionPool: cp,
 	}

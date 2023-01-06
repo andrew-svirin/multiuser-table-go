@@ -10,6 +10,7 @@ import (
 	"github.com/andrew-svirin/multiuser-table-go/server/services/controller"
 	"github.com/andrew-svirin/multiuser-table-go/server/services/router"
 	"github.com/andrew-svirin/multiuser-table-go/server/services/server"
+	"github.com/andrew-svirin/multiuser-table-go/server/services/system"
 	"os"
 	"strings"
 	"sync"
@@ -95,12 +96,18 @@ func (r *Runtime) ServeCmd() {
 		case "help":
 		case "h":
 			fmt.Println("Allowed commands:\n" +
-				"count	- count connections\n" +
-				"exit 	- to exit from program")
+				"count (c)	- count connections\n" +
+				"usage (u)	- usage of system\n" +
+				"exit (e) 	- to exit from program")
 			break
 		case "count":
 		case "c":
 			fmt.Println("Connections:", r.wsServer.CountConnections())
+			break
+		case "usage":
+		case "u":
+			fmt.Printf("Usage:\nMemory = %vKb	CPU = %.2f%%\n",
+				system.MemoryUsageKb(), system.CPUUsagePercents())
 			break
 		case "exit":
 		case "e":
