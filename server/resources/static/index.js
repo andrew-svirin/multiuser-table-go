@@ -9,7 +9,7 @@ socket.onopen = () => {
 };
 
 socket.onclose = (event) => {
-    const details = `(Code: ${event.code} Reason: ${event.reason})`
+    const details = `(Code: ${event.code})`
 
     if (event.wasClean) {
         console.log('Closed connection', details);
