@@ -7,12 +7,20 @@ import (
 	"os"
 )
 
-// StaticDir - dir with static files.
+// ResourcesDir - dir with resources dir.
+const ResourcesDir = "/resources"
+
+// StaticDir - dir with static dir.
 const StaticDir = "/static"
+
+// ResolveResourcePath - resolve path to the file in `resources` dir.
+func ResolveResourcePath(rel string) string {
+	return resolveRootDir() + ResourcesDir + rel
+}
 
 // ResolveStaticPath - resolve path to the file in `static` dir.
 func ResolveStaticPath(rel string) string {
-	return resolveRootDir() + StaticDir + rel
+	return resolveRootDir() + ResourcesDir + StaticDir + rel
 }
 
 // resolveRootDir - resolve path to the root dir.

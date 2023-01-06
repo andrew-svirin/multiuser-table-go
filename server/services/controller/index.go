@@ -10,7 +10,7 @@ import (
 // HandleIndex - handling index route by reading file and streaming it.
 func HandleIndex(w http.ResponseWriter, r *http.Request) {
 
-	fileName := filesystem.ResolveStaticPath("/index.html")
+	fileName := filesystem.ResolveResourcePath("/index.html")
 
 	http.ServeFile(w, r, fileName)
 }

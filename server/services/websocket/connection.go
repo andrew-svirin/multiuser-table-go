@@ -35,6 +35,8 @@ func (cp *ConnectionPool) ReadConnMessage(id int) (int, []byte) {
 	c := cp.take(id)
 
 	if c == nil {
+		log.Printf("Connection not found by ID `%d`", id)
+
 		return websocket.TextMessage, nil
 	}
 
@@ -46,7 +48,24 @@ func (cp *ConnectionPool) ReadConnMessage(id int) (int, []byte) {
 		return mt, nil
 	}
 
-	return mt, message
+	return websocket.TextMessage, message
+}
+
+// WriteConnMessage - write message to connection in the pool.
+func (cp *ConnectionPool) WriteConnMessage(id int, messageType int, data []byte) {
+	c := cp.take(id)
+
+	if c == nil {
+		log.Printf("Connection not found by ID `%d`", id)
+
+		return
+	}
+
+	err := c.WriteMessage(messageType, data)
+
+	if err != nil {
+		log.Printf("Message can not be written to ID `%d`: %s", id, err)
+	}
 }
 
 // CloseConn - close specified connection in the pool.
