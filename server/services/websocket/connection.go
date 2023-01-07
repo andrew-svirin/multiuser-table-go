@@ -11,8 +11,11 @@ type ConnectionPool struct {
 	connections map[int]*websocket.Conn
 }
 
-// GoingAwayMessage - happens when connection was aborted.
+// GoingAwayMessage - uses when connection was aborted.
 const GoingAwayMessage = -1
+
+// TextMessage - uses when message is correct.
+const TextMessage = 1
 
 // Push - add new connection into the pool.
 func (cp *ConnectionPool) Push(c *websocket.Conn) int {
@@ -20,76 +23,26 @@ func (cp *ConnectionPool) Push(c *websocket.Conn) int {
 
 	cp.connections[cp.counter] = c
 
-	log.Printf("Established Connection `%d`", cp.counter)
-
 	return cp.counter
 }
 
-// take - takes specified connection from the pool.
-func (cp *ConnectionPool) take(id int) *websocket.Conn {
+// Get - get one connection from the pool.
+func (cp *ConnectionPool) Get(id int) *websocket.Conn {
 	return cp.connections[id]
 }
 
-// ReadConnMessage - read message from connection in the pool.
-func (cp *ConnectionPool) ReadConnMessage(id int) (int, []byte) {
-	c := cp.take(id)
-
-	if c == nil {
-		log.Printf("Connection not found by ID `%d`", id)
-
-		return websocket.TextMessage, nil
-	}
-
-	mt, message, err := c.ReadMessage()
-
-	if err != nil {
-		log.Printf("Message can not be read by ID `%d`: %s", id, err)
-
-		return mt, nil
-	}
-
-	return websocket.TextMessage, message
-}
-
-// WriteConnMessage - write message to connection in the pool.
-func (cp *ConnectionPool) WriteConnMessage(id int, messageType int, data []byte) {
-	c := cp.take(id)
-
-	if c == nil {
-		log.Printf("Connection not found by ID `%d`", id)
-
-		return
-	}
-
-	err := c.WriteMessage(messageType, data)
-
-	if err != nil {
-		log.Printf("Message can not be written to ID `%d`: %s", id, err)
-	}
-}
-
-// CloseConn - close specified connection in the pool.
-func (cp *ConnectionPool) CloseConn(id int) {
-	c := cp.take(id)
+// Delete - delete one connection in the pool.
+func (cp *ConnectionPool) Delete(id int) {
+	c := cp.Get(id)
 
 	c.Close()
 
 	delete(cp.connections, id)
-
-	log.Printf("Closed Connection `%d`", id)
 }
 
-// DispatchMessage - dispatch same message in the pool.
-func (cp *ConnectionPool) DispatchMessage(messageType int, data []byte) {
-	var err error
-
-	for id, c := range cp.connections {
-		err = c.WriteMessage(messageType, data)
-
-		if err != nil {
-			log.Printf("Message can not be written to ID `%d`: %s", id, err)
-		}
-	}
+// GetAll - get all connections from the pool.
+func (cp *ConnectionPool) GetAll() *ConnectionCollection {
+	return NewConnectionCollection(cp.connections)
 }
 
 // Count - count connections in pool.
@@ -102,5 +55,31 @@ func NewConnectionPool() *ConnectionPool {
 	return &ConnectionPool{
 		counter:     0,
 		connections: map[int]*websocket.Conn{},
+	}
+}
+
+// ConnectionCollection - collection of client websocket connections.
+// Represent interface of one client websocket.
+type ConnectionCollection struct {
+	connections map[int]*websocket.Conn
+}
+
+// WriteMessage - write same message to each connection.
+func (cc *ConnectionCollection) WriteMessage(messageType int, data []byte) {
+	var err error
+
+	for id, c := range cc.connections {
+		err = c.WriteMessage(messageType, data)
+
+		if err != nil {
+			log.Printf("Message can not be written to ID `%d`: %s", id, err)
+		}
+	}
+}
+
+// NewConnectionCollection - instantiate new connection collection.
+func NewConnectionCollection(c map[int]*websocket.Conn) *ConnectionCollection {
+	return &ConnectionCollection{
+		connections: c,
 	}
 }

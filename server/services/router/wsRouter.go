@@ -7,12 +7,12 @@ import (
 
 type WsRouter struct {
 	http.ServeMux
-	BeforeRouteCall func(w http.ResponseWriter, r *http.Request) (*websocket.ConnectionPool, int)
+	BeforeRouteCall func(w http.ResponseWriter, r *http.Request) *websocket.Bus
 }
 
 // AddIndexRoute - add route handle for index page.
 // Where `id` - is newly added connection for client.
-func (wsr *WsRouter) AddIndexRoute(pattern string, handler func(cp *websocket.ConnectionPool, id int) int) {
+func (wsr *WsRouter) AddIndexRoute(pattern string, handler func(*websocket.Bus) int) {
 	indexRoute := func(w http.ResponseWriter, r *http.Request) {
 		// "/" matches everything in index subtree,
 		// thus we need to check that path is index page.
@@ -25,11 +25,11 @@ func (wsr *WsRouter) AddIndexRoute(pattern string, handler func(cp *websocket.Co
 			panic("BeforeRouteCall is not declared")
 		}
 
-		cp, id := wsr.BeforeRouteCall(w, r)
+		wsReq := wsr.BeforeRouteCall(w, r)
 
 		// Listening for messages from client.
 		for {
-			mt := handler(cp, id)
+			mt := handler(wsReq)
 
 			if mt == websocket.GoingAwayMessage {
 				break

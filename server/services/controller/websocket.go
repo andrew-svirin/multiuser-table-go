@@ -6,40 +6,67 @@ import (
 
 // HandleWebsocket - handling websocket messages.
 // Dispatch to everyone incoming message.
-func HandleWebsocket(cp *websocket.ConnectionPool, id int) int {
-	mt, message := cp.ReadConnMessage(id)
+func HandleWebsocket(b *websocket.Bus) int {
+	mt, ie := b.ConnectionReadEvent()
 
-	if message != nil {
-		ie := websocket.DecodeMessage(message)
-		oe := websocket.NewEvent()
-
-		handleEvent(ie, oe, cp, id)
-
-		cp.DispatchMessage(mt, websocket.EncodeMessage(ie))
-		cp.WriteConnMessage(id, mt, websocket.EncodeMessage(oe))
+	if ie == nil {
+		b.ConnectionDelete()
 	} else {
-		cp.CloseConn(id)
+		handleEvent(ie, b)
 	}
 
 	return mt
 }
 
 // handleEvent - route event.
-// ie - incoming event
-// oe - outgoing event
-func handleEvent(ie *websocket.Event, oe *websocket.Event, cp *websocket.ConnectionPool, id int) {
+func handleEvent(ie *websocket.Event, b *websocket.Bus) {
 	switch ie.Op {
 	case websocket.AuthorizeOp:
-		authorize(ie, oe, cp, id)
+		authorize(ie, b)
+		break
+	case websocket.CellEditOp:
+		cellEdit(ie, b)
 		break
 	}
 }
 
-// Make event about authorized user.
-func authorize(_ *websocket.Event, oe *websocket.Event, _ *websocket.ConnectionPool, id int) {
-	oe.Op = websocket.AuthorizedOp
-	oe.Data = map[string]interface{}{
-		"type": "user",
-		"id":   id,
-	}
+// Handle event about authorized user.
+func authorize(_ *websocket.Event, b *websocket.Bus) {
+	oe := websocket.NewEvent(
+		websocket.AuthorizedOp,
+		map[string]interface{}{
+			"id": b.ConnectionId(),
+		},
+	)
+	b.ConnectionWriteEvent(websocket.TextMessage, oe)
+
+	oea := websocket.NewEvent(
+		websocket.UserAuthorizedOp,
+		map[string]interface{}{
+			"id": b.ConnectionId(),
+		},
+	)
+	go b.ConnectionPoolWriteEvent(websocket.TextMessage, oea)
+}
+
+// Handle event about cell edit.
+func cellEdit(ie *websocket.Event, b *websocket.Bus) {
+	oe := websocket.NewEvent(
+		websocket.CellEditedOp,
+		map[string]interface{}{
+			"name":  ie.Data["name"],
+			"value": ie.Data["value"],
+		},
+	)
+	b.ConnectionWriteEvent(websocket.TextMessage, oe)
+
+	oea := websocket.NewEvent(
+		websocket.UserCellEditedOp,
+		map[string]interface{}{
+			"user_id": b.ConnectionId(),
+			"name":    ie.Data["name"],
+			"value":   ie.Data["value"],
+		},
+	)
+	go b.ConnectionPoolWriteEvent(websocket.TextMessage, oea)
 }

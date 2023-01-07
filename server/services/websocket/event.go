@@ -7,6 +7,10 @@ import (
 
 const AuthorizeOp = "authorize"
 const AuthorizedOp = "authorized"
+const UserAuthorizedOp = "user/authorized"
+const CellEditOp = "cell/edit"
+const CellEditedOp = "cell/edited"
+const UserCellEditedOp = "user/cell/edited"
 
 // Event structure for exchange by websocket.
 type Event struct {
@@ -27,8 +31,8 @@ func DecodeMessage(message []byte) *Event {
 	return &event
 }
 
-// EncodeMessage - encode event to message
-func EncodeMessage(e *Event) []byte {
+// EncodeEvent - encode event to message
+func EncodeEvent(e *Event) []byte {
 	b, err := json.Marshal(e)
 
 	if err != nil {
@@ -39,6 +43,6 @@ func EncodeMessage(e *Event) []byte {
 }
 
 // NewEvent - creates new event.
-func NewEvent() *Event {
-	return &Event{}
+func NewEvent(op string, data map[string]interface{}) *Event {
+	return &Event{Op: op, Data: data}
 }
