@@ -1,4 +1,4 @@
-package controller
+package controllers
 
 // Controller for index page.
 

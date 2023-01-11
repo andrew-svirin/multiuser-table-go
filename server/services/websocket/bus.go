@@ -39,13 +39,15 @@ func (r *Bus) connectionReadMessage() (int, []byte) {
 
 // ConnectionReadEvent - read event from current connection.
 func (r *Bus) ConnectionReadEvent() (int, *Event) {
-	mt, message := r.connectionReadMessage()
+	mt, msg := r.connectionReadMessage()
 
 	if mt != websocket.TextMessage {
 		return mt, nil
 	}
 
-	return mt, DecodeMessage(message)
+	e := DecodeMessage(msg)
+
+	return mt, &e
 }
 
 // ConnectionDelete - delete current connection.
@@ -63,10 +65,10 @@ func (r *Bus) connectionWriteMessage(mt int, message []byte) {
 }
 
 // ConnectionWriteEvent - write event into current connection.
-func (r *Bus) ConnectionWriteEvent(nt int, e *Event) {
+func (r *Bus) ConnectionWriteEvent(e *Event) {
 	message := EncodeEvent(e)
 
-	r.connectionWriteMessage(nt, message)
+	r.connectionWriteMessage(websocket.TextMessage, message)
 }
 
 // connectionPoolWriteMessage - write message into connection pool.
@@ -75,10 +77,10 @@ func (r *Bus) connectionPoolWriteMessage(mt int, message []byte) {
 }
 
 // ConnectionPoolWriteEvent - write event into connection pool.
-func (r *Bus) ConnectionPoolWriteEvent(mt int, e *Event) {
+func (r *Bus) ConnectionPoolWriteEvent(e *Event) {
 	message := EncodeEvent(e)
 
-	r.connectionPoolWriteMessage(mt, message)
+	r.connectionPoolWriteMessage(websocket.TextMessage, message)
 }
 
 // NewRequest - creator for new  request.

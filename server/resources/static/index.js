@@ -7,7 +7,7 @@ socket.onopen = () => {
 
     table.authorize();
 
-    table.handleInput()
+    table.handleInput();
 };
 
 socket.onclose = (event) => {
@@ -29,12 +29,16 @@ socket.onmessage = (event) => {
     switch (ev.Op) {
         case 'authorized': // Current user authorized.
             table.showAuthorized(ev.Data);
+            table.loadCells();
             break;
         case 'user/authorized': // Other user authorized.
             break;
         case 'cell/edited': // Current user edited cell.
             break;
         case 'user/cell/edited': // Other user edited cell.
+            table.fillCell(ev.Data);
+            break;
+        case 'cell/loading': // Current user loading cell.
             table.fillCell(ev.Data);
             break;
     }
@@ -49,6 +53,14 @@ const table = {
     // Connect to table and authorize client.
     authorize: () => {
         const msg = {Op: 'authorize', Data: {}}
+        socket.send(JSON.stringify(msg));
+    },
+
+    // Loading all cells.
+    loadCells: () => {
+        const msg = {
+            Op: 'cell/load/all', Data: {}
+        }
         socket.send(JSON.stringify(msg));
     },
 
@@ -82,6 +94,6 @@ const table = {
     showAuthorized: (data) => {
         const elem = document.querySelector('#connection-id');
 
-        elem.textContent = `Current connection: ${data?.id}`
+        elem.textContent = `Current user: ${data?.id}`
     },
 }

@@ -6,18 +6,21 @@ import (
 	"net/http"
 )
 
+// httpHandler - handler structure.
+type httpHandler func(http.ResponseWriter, *http.Request)
+
 // HttpRouter - custom router structure.
 type HttpRouter struct {
 	http.ServeMux
 }
 
 // AddRoute - add route handle for common page.
-func (r *HttpRouter) AddRoute(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	r.HandleFunc(pattern, handler)
+func (hr *HttpRouter) AddRoute(pattern string, h httpHandler) {
+	hr.HandleFunc(pattern, h)
 }
 
 // AddIndexRoute - add route handle for index page.
-func (r *HttpRouter) AddIndexRoute(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+func (hr *HttpRouter) AddIndexRoute(pattern string, h httpHandler) {
 	indexRoute := func(w http.ResponseWriter, r *http.Request) {
 		// "/" matches everything in index subtree,
 		// thus we need to check that path is index page.
@@ -26,13 +29,13 @@ func (r *HttpRouter) AddIndexRoute(pattern string, handler func(http.ResponseWri
 			return
 		}
 
-		handler(w, r)
+		h(w, r)
 	}
 
-	r.HandleFunc(pattern, indexRoute)
+	hr.HandleFunc(pattern, indexRoute)
 }
 
 // NewHttpRouter - instantiate new http router.
 func NewHttpRouter() *HttpRouter {
-	return new(HttpRouter)
+	return &HttpRouter{}
 }

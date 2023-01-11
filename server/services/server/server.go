@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"net/http"
-	"strconv"
 )
 
 // Server Server - custom server structure.
@@ -30,11 +29,11 @@ func (s *Server) Shutdown() {
 }
 
 // NewServer - instantiate new server.
-func NewServer(port int, handler http.Handler) *Server {
+func NewServer(port string, h http.Handler) *Server {
 	return &Server{
 		http.Server{
-			Addr:    ":" + strconv.Itoa(port),
-			Handler: handler,
+			Addr:    ":" + port,
+			Handler: h,
 		},
 	}
 }

@@ -1,4 +1,4 @@
-package controller
+package controllers
 
 import (
 	"github.com/andrew-svirin/multiuser-table-go/server/services/filesystem"

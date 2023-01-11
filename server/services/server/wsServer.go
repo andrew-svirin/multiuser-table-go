@@ -8,7 +8,7 @@ import (
 
 // WsServer - custom ws server structure.
 type WsServer struct {
-	Server
+	*Server
 	upgrader       *websocket.Upgrader
 	connectionPool *websocket.ConnectionPool
 }
@@ -18,7 +18,7 @@ func (s *WsServer) CountConnections() int {
 }
 
 // NewWsServer - Instantiate new ws server.
-func NewWsServer(port int, router *router.WsRouter) *WsServer {
+func NewWsServer(pt string, ro *router.WsRouter) *WsServer {
 	u := websocket.NewUpgrader()
 	cp := websocket.NewConnectionPool()
 
@@ -26,18 +26,16 @@ func NewWsServer(port int, router *router.WsRouter) *WsServer {
 	co := func(r *http.Request) bool { return true }
 	u.CheckOriginFunc(co)
 
-	router.BeforeRouteCall = func(w http.ResponseWriter, r *http.Request) *websocket.Bus {
+	ro.BeforeRouteCall = func(w http.ResponseWriter, r *http.Request) *websocket.Bus {
 		c := u.UpgradeConnection(w, r)
 		cId := cp.Push(c)
 
 		return websocket.NewRequest(cp, cId)
 	}
 
-	s := &WsServer{
-		Server:         *NewServer(port, router),
+	return &WsServer{
+		Server:         NewServer(pt, ro),
 		upgrader:       u,
 		connectionPool: cp,
 	}
-
-	return s
 }

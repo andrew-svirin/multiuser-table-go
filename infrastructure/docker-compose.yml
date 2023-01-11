@@ -21,6 +21,20 @@ services:
       multiuser-table-go-net:
         ipv4_address: 172.123.0.4
 
+  db-multiuser-table-go:
+    container_name: db-multiuser-table-go
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - db-multiuser-table-go-db:/var/lib/mysql
+      - ./mysql-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
 networks:
   multiuser-table-go-net:
     driver: bridge
@@ -30,3 +44,6 @@ networks:
         - subnet: 172.123.0.0/24
     driver_opts:
       com.docker.network.bridge.name: br_mtg
+
+volumes:
+  db-multiuser-table-go-db:

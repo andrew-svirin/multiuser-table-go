@@ -5,21 +5,17 @@ import (
 	"log"
 )
 
-const AuthorizeOp = "authorize"
-const AuthorizedOp = "authorized"
-const UserAuthorizedOp = "user/authorized"
-const CellEditOp = "cell/edit"
-const CellEditedOp = "cell/edited"
-const UserCellEditedOp = "user/cell/edited"
+type EventOperation string
+type EventData map[string]interface{}
 
 // Event structure for exchange by websocket.
 type Event struct {
 	Op   string
-	Data map[string]interface{}
+	Data EventData
 }
 
 // DecodeMessage - DecodeMessage event from message
-func DecodeMessage(message []byte) *Event {
+func DecodeMessage(message []byte) Event {
 	var event Event
 
 	err := json.Unmarshal(message, &event)
@@ -28,7 +24,7 @@ func DecodeMessage(message []byte) *Event {
 		log.Println("Message was not decoded", err)
 	}
 
-	return &event
+	return event
 }
 
 // EncodeEvent - encode event to message
@@ -43,6 +39,6 @@ func EncodeEvent(e *Event) []byte {
 }
 
 // NewEvent - creates new event.
-func NewEvent(op string, data map[string]interface{}) *Event {
-	return &Event{Op: op, Data: data}
+func NewEvent(op string, d EventData) *Event {
+	return &Event{Op: op, Data: d}
 }

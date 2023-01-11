@@ -6,12 +6,12 @@ import (
 
 // HttpServer - custom http server structure.
 type HttpServer struct {
-	Server
+	*Server
 }
 
 // NewHttpServer - initiate new http server.
-func NewHttpServer(port int, router *router.HttpRouter) *HttpServer {
+func NewHttpServer(port string, router *router.HttpRouter) *HttpServer {
 	return &HttpServer{
-		Server: *NewServer(port, router),
+		Server: NewServer(port, router),
 	}
 }
