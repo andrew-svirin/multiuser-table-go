@@ -2,13 +2,9 @@ package database
 
 import (
 	"database/sql"
-	"log"
 )
 
 // Collection uses to manage query rows.
-
-// ModelHandler - model handler type.
-type ModelHandler func(IModel)
 
 // Collection - collection struct.
 type Collection struct {
@@ -16,17 +12,17 @@ type Collection struct {
 	modelGenerator ModelGenerator
 }
 
-// Each - walker over rows.
+// Each - walker over rows and applying handler.
 func (c *Collection) Each(h ModelHandler) {
 	for c.rows.Next() {
 		m := c.modelGenerator()
-
-		f := ResolveModelColumnFields(m)
+		s := m.Schema()
+		f := s.ResolveColumnFields()
 
 		err := c.rows.Scan(f...)
 
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 
 		h(m)

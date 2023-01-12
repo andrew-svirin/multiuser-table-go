@@ -13,11 +13,11 @@ type Cell struct {
 }
 
 // Schema - implements repository schema.
-func (c *Cell) Schema() database.Schema {
-	return database.Schema{
+func (c *Cell) Schema() *database.Schema {
+	return &database.Schema{
 		Table: "cells",
 		Columns: []database.Column{
-			database.NewColumn("id", &c.ID),
+			database.NewAutoColumn("id", &c.ID),
 			database.NewColumn("column", &c.Column),
 			database.NewColumn("row", &c.Row),
 			database.NewColumn("value", &c.Value),

@@ -29,7 +29,7 @@ func NewConfig() *Config {
 				RegisterRoutesCall: func(ro *router.WsRouter) {
 					ro.AddIndexRoute("/", controllers.HandleWebsocket)
 					ro.AddEventRoute("authorize", controllers.HandleAuthorize)
-					ro.AddEventRoute("cell/edit", controllers.HandleCellEdit)
+					ro.AddEventRoute("cell/save", controllers.HandleCellSave)
 					ro.AddEventRoute("cell/load/all", controllers.HandleCellLoadAll)
 				},
 			},

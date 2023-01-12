@@ -6,7 +6,7 @@ import (
 )
 
 type EventOperation string
-type EventData map[string]interface{}
+type EventData map[string]any
 
 // Event structure for exchange by websocket.
 type Event struct {

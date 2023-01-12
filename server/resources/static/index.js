@@ -28,15 +28,22 @@ socket.onmessage = (event) => {
     // handle event.
     switch (ev.Op) {
         case 'authorized': // Current user authorized.
-            table.showAuthorized(ev.Data);
+            connection.showAuthorized(ev.Data);
             table.loadCells();
+            log.pushEvent(`Current user "${ev.Data?.id}" authorized`)
             break;
         case 'user/authorized': // Other user authorized.
+            log.pushEvent(`User "${ev.Data?.id}" authorized`)
             break;
-        case 'cell/edited': // Current user edited cell.
+        case 'user/disconnected': // Other user disconnected.
+            log.pushEvent(`User "${ev.Data?.id}" disconnected`)
             break;
-        case 'user/cell/edited': // Other user edited cell.
+        case 'cell/saved': // Current user saved cell.
+            log.pushEvent(`Current user saved cell "${ev.Data?.name}"`)
+            break;
+        case 'user/cell/saved': // Other user saved cell.
             table.fillCell(ev.Data);
+            log.pushEvent(`User "${ev.Data?.user_id}" saved cell "${ev.Data?.name}"`)
             break;
         case 'cell/loading': // Current user loading cell.
             table.fillCell(ev.Data);
@@ -71,10 +78,10 @@ const table = {
         input.value = data.value;
     },
 
-    // Edit cell.
-    editCell: (event) => {
+    // Save cell.
+    saveCell: (event) => {
         const msg = {
-            Op: 'cell/edit', Data: {
+            Op: 'cell/save', Data: {
                 name: event.target.getAttribute('name'), value: event.target.value,
             }
         }
@@ -86,14 +93,30 @@ const table = {
         const inputs = document.querySelectorAll('.cell input');
 
         inputs.forEach(function (input) {
-            input.addEventListener("focusout", table.editCell);
+            input.addEventListener("focusout", table.saveCell);
         });
     },
+}
+
+const connection = {
 
     // Show authorized connection.
     showAuthorized: (data) => {
         const elem = document.querySelector('#connection-id');
 
         elem.textContent = `Current user: ${data?.id}`
+    },
+}
+
+const log = {
+
+    // Push event log.
+    pushEvent: (log) => {
+        const list = document.querySelector('#event-log');
+
+        const item = document.createElement("li")
+        item.textContent = log
+
+        list.append(item)
     },
 }
