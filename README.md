@@ -7,14 +7,14 @@ Multiple users can edit one table at same time.
 Infrastructure: Docker  
 Server: Go + Websocket + MySql + Javascript
 
-## Client
+### Client
 
 - User can authorize on server
 - User connecting by websocket to server
 - User sending operations under the connection, table to server
 - User listening to operations under the connection, table from server
 
-# Server
+### Server
 
 - Serve api requests and websocket events in separate processes
 - Avoid intersections in processes
